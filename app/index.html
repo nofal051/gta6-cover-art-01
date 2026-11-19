@@ -34,6 +34,7 @@
         <button type="button" data-group="layout" data-value="grid-four">2 × 2 grid</button>
         <button type="button" data-group="layout" data-value="full-bleed">One photo</button>
         <button type="button" data-group="layout" data-value="triple-strip">3 strips</button>
+        <button type="button" data-group="layout" data-value="duo-split">Duo split</button>
       </div>
     </section>
     <section class="card">
@@ -44,13 +45,30 @@
         <button type="button" data-group="grade" data-value="golden">Golden</button>
         <button type="button" data-group="grade" data-value="dusk">Dusk</button>
         <button type="button" data-group="grade" data-value="noir">Noir</button>
+        <button type="button" data-group="grade" data-value="vice-dusk">Vice Dusk</button>
       </div>
     </section>
     <section class="card">
       <h2>Step 4 — Caption</h2>
+      <p class="caption-hint">One-tap looks — pick a preset, then fine-tune it below.</p>
+      <div class="row preset-row">
+        <button type="button" data-caption-preset="heist">Last Score</button>
+        <button type="button" data-caption-preset="queen">Boulevard Queen</button>
+        <button type="button" data-caption-preset="shore">Neon Shore</button>
+        <button type="button" data-caption-preset="getaway">Clean Getaway</button>
+        <button type="button" data-caption-preset="dusk">Vice Dusk</button>
+      </div>
       <label>Title <input id="title" type="text" value="SUNSET HEIST" maxlength="40"></label>
       <label>Subtitle <input id="subtitle" type="text" value="one last score" maxlength="40"></label>
       <label>Keywords, comma separated <input id="keywords" type="text" value="SUNSET, HEIST, NEON, PALMS" maxlength="60"></label>
+      <div class="caption-size-row">
+        <span class="caption-size-label">Caption size</span>
+        <button type="button" data-caption-size="small">Small</button>
+        <button type="button" data-caption-size="medium">Medium</button>
+        <button type="button" data-caption-size="large">Large</button>
+      </div>
+      <p id="caption-size-note" class="caption-size-note">Caption size: Large (122% of normal)</p>
+      <label class="shadow-toggle"><input id="caption-shadow" type="checkbox" checked> Text shadow / neon glow</label>
     </section>
     <section class="card">
       <h2>Step 5 — Size &amp; export</h2>

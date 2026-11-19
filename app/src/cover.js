@@ -17,6 +17,7 @@ export const LAYOUTS = {
   'grid-four': { label: 'Four Grid', panels: 4 },
   'full-bleed': { label: 'Full Bleed', panels: 1 },
   'triple-strip': { label: 'Triple Strip', panels: 3 },
+  'duo-split': { label: 'Duo Split', panels: 2 },
 };
 
 export const GRADES = {
@@ -25,7 +26,107 @@ export const GRADES = {
   golden: { label: 'Golden Hour', neon: '#ffb02e' },
   dusk: { label: 'Dusk Violet', neon: '#c084fc' },
   noir: { label: 'Palm Noir', neon: '#f5f5f5' },
+  'vice-dusk': { label: 'Vice Dusk', neon: '#7dd3fc' },
 };
+
+// One-tap caption looks: a title, a handwritten subtitle and the chips
+// that go with them, plus the caption size and shadow each look prefers.
+export const CAPTION_PRESETS = {
+  heist: {
+    label: 'Last Score',
+    title: 'SUNSET HEIST',
+    subtitle: 'one last score',
+    keywords: ['SUNSET', 'HEIST', 'NEON', 'PALMS'],
+    captionSize: 'large',
+    captionShadow: true,
+  },
+  queen: {
+    label: 'Boulevard Queen',
+    title: 'BOULEVARD QUEEN',
+    subtitle: 'she runs this town',
+    keywords: ['BOULEVARD', 'QUEEN', 'VICE', 'NIGHT'],
+    captionSize: 'medium',
+    captionShadow: true,
+  },
+  shore: {
+    label: 'Neon Shore',
+    title: 'NEON SHORE',
+    subtitle: 'tide comes in at midnight',
+    keywords: ['NEON', 'SHORE', 'TIDE', 'VICE'],
+    captionSize: 'medium',
+    captionShadow: false,
+  },
+  getaway: {
+    label: 'Clean Getaway',
+    title: 'CLEAN GETAWAY',
+    subtitle: 'no plates, no witnesses',
+    keywords: ['GETAWAY', 'SPEED', 'DAWN', 'VICE'],
+    captionSize: 'small',
+    captionShadow: true,
+  },
+  dusk: {
+    label: 'Vice Dusk',
+    title: 'VICE DUSK',
+    subtitle: 'the city lights itself',
+    keywords: ['DUSK', 'VICE', 'LIGHTS', 'PALMS'],
+    captionSize: 'large',
+    captionShadow: false,
+  },
+};
+
+export const CAPTION_SIZES = {
+  small: { label: 'Small', scale: 0.82 },
+  medium: { label: 'Medium', scale: 1 },
+  large: { label: 'Large', scale: 1.22 },
+};
+
+// How big the caption lettering should be, as a multiplier on the size
+// the layout would otherwise pick. Unknown values fall back to 1.
+export function captionSizeScale(state) {
+  const key = state && state.captionSize;
+  const entry = CAPTION_SIZES[key];
+  if (entry) return entry.scale;
+  if (typeof key === 'number' && key > 0.4 && key < 2) return key;
+  return 1;
+}
+
+// Whether the caption should carry its neon glow / drop shadow. The
+// default is on; the shore and dusk presets switch it off for a flat,
+// print-poster look.
+export function captionShadowOn(state) {
+  if (!state) return true;
+  if (typeof state.captionShadow === 'boolean') return state.captionShadow;
+  return true;
+}
+
+// Looks up a preset by key and returns a fresh copy, or null when the
+// key is not one of the known presets.
+export function resolveCaptionPreset(key) {
+  const preset = CAPTION_PRESETS[key];
+  if (!preset) return null;
+  return {
+    label: preset.label,
+    title: preset.title,
+    subtitle: preset.subtitle,
+    keywords: [...preset.keywords],
+    captionSize: preset.captionSize,
+    captionShadow: preset.captionShadow,
+  };
+}
+
+// Applies a preset to a state object in place and returns the preset
+// that was applied, or null when the key was unknown and nothing changed.
+export function applyCaptionPresetToState(state, key) {
+  const preset = resolveCaptionPreset(key);
+  if (!preset || !state) return null;
+  state.title = preset.title;
+  state.subtitle = preset.subtitle;
+  state.keywords = [...preset.keywords];
+  state.captionSize = preset.captionSize;
+  state.captionShadow = preset.captionShadow;
+  state.captionPreset = key;
+  return preset;
+}
 
 // mulberry32: a small seeded generator so the grain speckles land in the
 // same places on every render of the same cover.
@@ -76,6 +177,18 @@ export function layoutPanels(layout, W, H) {
       { x: 0, y: 0, w: cellW, h: H },
       { x: cellW + g, y: 0, w: cellW, h: H },
       { x: 2 * (cellW + g), y: 0, w: W - 2 * (cellW + g), h: H },
+    ];
+  }
+  if (layout === 'duo-split') {
+    // Two photos side by side, sharing one caption bar along the
+    // bottom. The photos stop above the bar so the title never has to
+    // fight a busy photo for legibility.
+    const barH = Math.round(H * 0.19);
+    const photoH = H - barH - g;
+    const halfW = Math.round((W - g) / 2);
+    return [
+      { x: 0, y: 0, w: halfW, h: photoH },
+      { x: halfW + g, y: 0, w: W - halfW - g, h: photoH },
     ];
   }
   return [{ x: 0, y: 0, w: W, h: H }]; // full-bleed: one panel, edge to edge
@@ -157,6 +270,16 @@ const GRADE_RECIPES = {
     glows: [[0.5, 0.2, 0.55, 'rgba(150,90,255,0.16)', 'screen']],
   },
   noir: { washes: null, glows: [] },
+  'vice-dusk': {
+    washes: [
+      [[0, 'rgba(124,58,237,0.24)'], [0.5, 'rgba(45,212,191,0.08)'], [1, 'rgba(8,47,73,0.30)']],
+      'overlay',
+    ],
+    glows: [
+      [0.18, 0.1, 0.5, 'rgba(167,139,250,0.22)', 'screen'],
+      [0.82, 0.88, 0.45, 'rgba(45,212,191,0.18)', 'screen'],
+    ],
+  },
 };
 
 function paintGrade(ctx, grade, W, H) {
@@ -237,6 +360,45 @@ function starBurstPath(ctx, cx, cy, outer, inner, points) {
   ctx.closePath();
 }
 
+// Duo-split only: a solid shared caption bar under both photos, with
+// a neon divider on its top edge and a faint diagonal sheen so the bar
+// reads as part of the poster rather than a plain rectangle. The title
+// is painted over this bar by paintCaption, which already sits low.
+function paintSharedCaptionBar(ctx, state, W, H) {
+  if (state.layout !== 'duo-split') return;
+  const grade = GRADES[state.grade] || GRADES.sunset;
+  const g = gutterFor(W);
+  const barH = Math.round(H * 0.19);
+  const barY = H - barH;
+  const barGrad = ctx.createLinearGradient(0, barY, 0, H);
+  barGrad.addColorStop(0, '#1b0b33');
+  barGrad.addColorStop(1, '#0a0418');
+  ctx.save();
+  ctx.fillStyle = barGrad;
+  ctx.fillRect(0, barY, W, barH);
+  // Neon divider line along the top of the bar.
+  ctx.fillStyle = grade.neon;
+  ctx.fillRect(0, barY - Math.max(2, g * 0.4), W, Math.max(2, g * 0.4));
+  // Diagonal sheen, clipped to the bar.
+  ctx.beginPath();
+  ctx.rect(0, barY, W, barH);
+  ctx.clip();
+  const sheen = ctx.createLinearGradient(0, barY, W, H);
+  sheen.addColorStop(0, 'rgba(255,255,255,0.10)');
+  sheen.addColorStop(0.35, 'rgba(255,255,255,0.0)');
+  sheen.addColorStop(1, 'rgba(255,255,255,0.05)');
+  ctx.fillStyle = sheen;
+  ctx.fillRect(0, barY, W, barH);
+  // A small "DUO" tag in the bar's top-right corner.
+  const tagPx = Math.max(12, Math.round(W * 0.016));
+  ctx.font = `400 ${tagPx}px Anton, sans-serif`;
+  ctx.textAlign = 'right';
+  ctx.textBaseline = 'middle';
+  ctx.fillStyle = grade.neon;
+  ctx.fillText('DUO', W - Math.round(W * 0.03), barY + Math.round(barH * 0.22));
+  ctx.restore();
+}
+
 // The caption block: big layered Anton title, neon Pacifico subtitle
 // above it, keyword chips along the bottom, and a star-burst badge.
 function paintCaption(ctx, state, W, H) {
@@ -257,7 +419,8 @@ function paintCaption(ctx, state, W, H) {
     ctx.fillRect(0, bandY - 40, W, H - bandY + 40);
   }
 
-  const titlePx = fitFont(ctx, title, maxW, Math.round(W * 0.105), 'Anton, sans-serif', 400);
+  const scale = captionSizeScale(state);
+  const titlePx = fitFont(ctx, title, maxW, Math.round(W * 0.105 * scale), 'Anton, sans-serif', 400);
   const titleY = H - Math.round(H * 0.075);
   ctx.save();
   ctx.translate(pad, titleY);
@@ -284,8 +447,8 @@ function paintCaption(ctx, state, W, H) {
     ctx.font = `400 ${subPx}px Pacifico, cursive`;
     ctx.textAlign = 'left';
     ctx.textBaseline = 'alphabetic';
-    ctx.shadowColor = grade.neon;
-    ctx.shadowBlur = Math.round(W * 0.018);
+    ctx.shadowColor = captionShadowOn(state) ? grade.neon : 'rgba(0,0,0,0)';
+    ctx.shadowBlur = captionShadowOn(state) ? Math.round(W * 0.018) : 0;
     ctx.fillStyle = grade.neon;
     ctx.fillText(subtitle, 0, 0);
     ctx.shadowBlur = 0;
@@ -357,6 +520,7 @@ export function drawCover(ctx, state, W, H) {
   });
   paintGrade(ctx, state.grade, W, H);
   paintGrain(ctx, W, H);
+  paintSharedCaptionBar(ctx, state, W, H);
   paintCaption(ctx, state, W, H);
   // Thin outer frame.
   ctx.strokeStyle = 'rgba(255,255,255,0.9)';

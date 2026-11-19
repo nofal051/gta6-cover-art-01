@@ -6,7 +6,7 @@
 // PNGs. The deterministic screenshot scenes live in shots.js and call
 // into the helpers here.
 
-import { drawCover, layoutPanels, LAYOUTS, GRADES, SIZES } from './cover.js';
+import { drawCover, layoutPanels, LAYOUTS, GRADES, SIZES, CAPTION_PRESETS, CAPTION_SIZES, applyCaptionPresetToState } from './cover.js';
 import { runCoverShot, applyShotParams, loadShotPhotos, markReady } from './shots.js';
 
 export const SAMPLES = {
@@ -29,6 +29,9 @@ export function freshState() {
     keywords: [...DEFAULT_KEYWORDS],
     panels,
     selected: 0,
+    captionPreset: 'heist',
+    captionSize: 'large',
+    captionShadow: true,
   };
 }
 
@@ -253,16 +256,101 @@ function wireText(state, rerender) {
   const keywords = document.getElementById('keywords');
   title.addEventListener('input', () => {
     state.title = title.value;
+    markCaptionCustom(state);
     rerender();
   });
   subtitle.addEventListener('input', () => {
     state.subtitle = subtitle.value;
+    markCaptionCustom(state);
     rerender();
   });
   keywords.addEventListener('input', () => {
     state.keywords = keywords.value.split(',').map((s) => s.trim()).filter(Boolean);
+    markCaptionCustom(state);
     rerender();
   });
+}
+
+// Keeps the caption controls showing what the state actually holds:
+// which preset button is lit, which size is picked, and whether the
+// shadow checkbox is ticked. Called after every preset or size change
+// and once at startup, so the panel never drifts from the canvas.
+export function syncCaptionControls(state) {
+  for (const button of document.querySelectorAll('[data-caption-preset]')) {
+    button.classList.toggle('on', button.dataset.captionPreset === state.captionPreset);
+  }
+  for (const button of document.querySelectorAll('[data-caption-size]')) {
+    button.classList.toggle('on', button.dataset.captionSize === state.captionSize);
+  }
+  const shadow = document.getElementById('caption-shadow');
+  if (shadow) shadow.checked = state.captionShadow !== false;
+  const sizeNote = document.getElementById('caption-size-note');
+  if (sizeNote) {
+    const entry = CAPTION_SIZES[state.captionSize];
+    sizeNote.textContent = entry
+      ? `Caption size: ${entry.label} (${Math.round(entry.scale * 100)}% of normal)`
+      : 'Caption size: Medium (100% of normal)';
+  }
+}
+
+// Writes the caption text fields from the state after a preset lands,
+// so typing in the fields and picking a preset never disagree.
+function syncCaptionTextFields(state) {
+  const title = document.getElementById('title');
+  const subtitle = document.getElementById('subtitle');
+  const keywords = document.getElementById('keywords');
+  if (title) title.value = state.title;
+  if (subtitle) subtitle.value = state.subtitle;
+  if (keywords) keywords.value = state.keywords.join(', ');
+}
+
+// One-tap caption looks. Picking a preset fills the title, subtitle,
+// keywords, size and shadow from CAPTION_PRESETS, then repaints.
+function wireCaptionPresets(state, rerender) {
+  for (const button of document.querySelectorAll('[data-caption-preset]')) {
+    button.addEventListener('click', () => {
+      const applied = applyCaptionPresetToState(state, button.dataset.captionPreset);
+      if (!applied) return;
+      syncCaptionTextFields(state);
+      syncCaptionControls(state);
+      rerender();
+    });
+  }
+}
+
+// Caption size: Small / Medium / Large buttons. Each one only changes
+// the scale key; the painter turns the key into a multiplier.
+function wireCaptionSize(state, rerender) {
+  for (const button of document.querySelectorAll('[data-caption-size]')) {
+    button.addEventListener('click', () => {
+      if (!CAPTION_SIZES[button.dataset.captionSize]) return;
+      state.captionSize = button.dataset.captionSize;
+      state.captionPreset = 'custom';
+      syncCaptionControls(state);
+      rerender();
+    });
+  }
+}
+
+// Text-shadow toggle: a plain checkbox that flips the neon glow behind
+// the subtitle (and the soft shadow under the title lettering) on or
+// off. Turning it off gives a flat, print-poster caption.
+function wireCaptionShadow(state, rerender) {
+  const shadow = document.getElementById('caption-shadow');
+  if (!shadow) return;
+  shadow.addEventListener('change', () => {
+    state.captionShadow = shadow.checked;
+    state.captionPreset = 'custom';
+    syncCaptionControls(state);
+    rerender();
+  });
+}
+
+// Any hand-typed caption edit clears the preset highlight, because the
+// text no longer matches a preset exactly. Size and shadow stay put.
+function markCaptionCustom(state) {
+  state.captionPreset = 'custom';
+  syncCaptionControls(state);
 }
 
 export async function startEditor() {
@@ -285,6 +373,10 @@ export async function startEditor() {
   wirePointer(state, canvas, rerender);
   wireButtons(state, rerender);
   wireText(state, rerender);
+  wireCaptionPresets(state, rerender);
+  wireCaptionSize(state, rerender);
+  wireCaptionShadow(state, rerender);
+  syncCaptionControls(state);
   document.getElementById('title').value = state.title;
   document.getElementById('subtitle').value = state.subtitle;
   document.getElementById('keywords').value = state.keywords.join(', ');

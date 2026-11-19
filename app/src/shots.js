@@ -7,7 +7,7 @@
 // the photos, then sets window.__shotReady so a headless browser knows
 // the frame is done.
 
-import { drawCover, SIZES } from './cover.js';
+import { drawCover, SIZES, CAPTION_PRESETS, CAPTION_SIZES, applyCaptionPresetToState } from './cover.js';
 
 const SHOT_SAMPLES = {
   boulevard: 'samples/boulevard.jpg',
@@ -28,6 +28,26 @@ export function applyShotParams(state, params) {
   if (subtitle !== null) state.subtitle = subtitle;
   const keywords = params.get('keywords');
   if (keywords) state.keywords = keywords.split(',').map((s) => s.trim()).filter(Boolean);
+  applyCaptionShotParams(state, params);
+}
+
+// New-shot knobs for the fix round: a caption preset, a caption size
+// and the shadow toggle, all readable from the shot query string so a
+// screenshot can show the new features exactly as the editor shows them.
+export function applyCaptionShotParams(state, params) {
+  const preset = params.get('preset');
+  if (preset && CAPTION_PRESETS[preset]) {
+    const applied = applyCaptionPresetToState(state, preset);
+    if (applied && params.get('caption')) state.title = params.get('caption');
+    if (applied && params.get('subtitle') !== null && params.get('subtitle') !== undefined) {
+      state.subtitle = params.get('subtitle');
+    }
+  }
+  const captionSize = params.get('captionSize');
+  if (captionSize && CAPTION_SIZES[captionSize]) state.captionSize = captionSize;
+  const shadow = params.get('captionShadow');
+  if (shadow === 'off' || shadow === 'false' || shadow === '0') state.captionShadow = false;
+  if (shadow === 'on' || shadow === 'true' || shadow === '1') state.captionShadow = true;
 }
 
 export async function loadShotPhotos(state, params, loadSamples, loadImage) {

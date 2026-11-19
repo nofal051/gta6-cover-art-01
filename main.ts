@@ -39,3 +39,26 @@ const dossier = buildDossier(outDir, {
   app_path_max_bytes: 1000,
 });
 writeFileSync(join(outDir, 'dossier.json'), dossier);
+
+// Fix-round check: confirm the hand-in actually landed before the
+// program exits, and print a one-line summary so a failed copy is
+// visible immediately instead of surfacing later at scoring time.
+import { readdirSync, statSync } from 'node:fs';
+
+function countHandInFiles(dir) {
+  let total = 0;
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const full = join(dir, entry.name);
+    total += entry.isDirectory() ? countHandInFiles(full) : 1;
+  }
+  return total;
+}
+
+const dossierPath = join(outDir, 'dossier.json');
+if (!existsSync(dossierPath)) throw new Error('dossier.json was not written to ' + outDir);
+const dossierBytes = statSync(dossierPath).size;
+if (dossierBytes > 1572864) {
+  throw new Error(`dossier.json is ${dossierBytes} bytes, over the 1.5 MiB cap (1572864 bytes) — refusing a hand-in the scorer would reject`);
+}
+const handInFiles = countHandInFiles(outDir);
+console.log(`Vice Nights hand-in ready: ${handInFiles} files, dossier.json ${dossierBytes} bytes in ${outDir}`);

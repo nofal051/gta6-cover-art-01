@@ -201,3 +201,56 @@ body.shot-cover #cover {
   border: none;
   box-shadow: none;
 }
+
+/* New in the fix round: caption presets, caption size, shadow toggle. */
+.caption-hint { font-size: 12px; opacity: 0.75; margin: 0 0 8px; }
+
+.preset-row { margin-bottom: 4px; }
+
+.preset-row button {
+  background: #2b0a4b;
+  border-color: #c084fc;
+}
+
+.preset-row button.on {
+  background: #7c3aed;
+  border-color: #c084fc;
+}
+
+.caption-size-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.caption-size-label { font-size: 13px; font-weight: 700; }
+
+.caption-size-row button {
+  background: #2b0a4b;
+  border-color: #2dd4bf;
+}
+
+.caption-size-row button.on {
+  background: #0f766e;
+  border-color: #2dd4bf;
+}
+
+.caption-size-note { font-size: 12px; opacity: 0.75; margin: 6px 0 0; }
+
+.shadow-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.shadow-toggle input[type='checkbox'] {
+  width: 16px;
+  height: 16px;
+  accent-color: #ff2d95;
+  cursor: pointer;
+}

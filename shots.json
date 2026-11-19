@@ -19,7 +19,7 @@
   },
   {
     "name": "4-cover-square.jpg",
-    "query": "?shot=cover&photo=boulevard&caption=Golden%20Hour&layout=full-bleed&grade=golden&size=square",
+    "query": "?shot=cover&photo=boulevard&caption=VICE%20DUSK&layout=duo-split&grade=vice-dusk&size=square&preset=dusk&captionSize=large",
     "w": 1024,
     "h": 1024
   }
