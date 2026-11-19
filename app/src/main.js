@@ -1,9 +1,10 @@
 // Vice Nights Cover Press — editor wiring.
 //
-// Owns the page state, loads the sample photos and the user's own photos,
-// wires every control to a live re-render, pans and zooms the selected
-// panel from pointer input, and exports exact-size PNGs. The deterministic
-// screenshot scenes live in shots.js and call into here.
+// Owns the page state and the DOM: it loads the sample photos and the
+// user's own photos, wires every control to a live re-render, pans and
+// zooms the selected panel from pointer input, and exports exact-size
+// PNGs. The deterministic screenshot scenes live in shots.js and call
+// into the helpers here.
 
 import { drawCover, layoutPanels, LAYOUTS, GRADES, SIZES } from './cover.js';
 import { runCoverShot, applyShotParams, loadShotPhotos, markReady } from './shots.js';
@@ -17,6 +18,8 @@ export const SAMPLES = {
 const DEFAULT_KEYWORDS = ['SUNSET', 'HEIST', 'NEON', 'PALMS'];
 
 export function freshState() {
+  const panels = [];
+  for (let i = 0; i < 4; i++) panels.push({ img: null, zoom: 1, ox: 0, oy: 0 });
   return {
     layout: 'hero-three',
     grade: 'sunset',
@@ -24,12 +27,7 @@ export function freshState() {
     title: 'SUNSET HEIST',
     subtitle: 'one last score',
     keywords: [...DEFAULT_KEYWORDS],
-    panels: [
-      { img: null, zoom: 1, ox: 0, oy: 0 },
-      { img: null, zoom: 1, ox: 0, oy: 0 },
-      { img: null, zoom: 1, ox: 0, oy: 0 },
-      { img: null, zoom: 1, ox: 0, oy: 0 },
-    ],
+    panels,
     selected: 0,
   };
 }
@@ -54,6 +52,8 @@ async function loadSamples(state) {
   }
 }
 
+// Draws the current state into the on-screen preview canvas, scaled to
+// fit at most 880px wide / 560px tall. Returns the preview size.
 export function renderPreview(state, canvas) {
   const size = SIZES[state.size];
   const scale = Math.min(880 / size.w, 560 / size.h, 1);
@@ -63,11 +63,11 @@ export function renderPreview(state, canvas) {
     canvas.width = w;
     canvas.height = h;
   }
-  const ctx = canvas.getContext('2d');
-  drawCover(ctx, state, w, h);
+  drawCover(canvas.getContext('2d'), state, w, h);
   return { w, h, scale };
 }
 
+// Renders the cover at full export size on a fresh canvas.
 export function renderExport(state, sizeKey) {
   const size = SIZES[sizeKey];
   const canvas = document.createElement('canvas');
@@ -83,16 +83,22 @@ function setPressed(group, value) {
   }
 }
 
+function resetPanelTransform(panel) {
+  panel.zoom = 1;
+  panel.ox = 0;
+  panel.oy = 0;
+}
+
 function buildPanelSlots(state, rerender) {
   const wrap = document.getElementById('panels');
   wrap.innerHTML = '';
   const count = LAYOUTS[state.layout].panels;
   for (let i = 0; i < count; i++) {
     const slot = document.createElement('div');
-    slot.className = 'panel-slot' + (state.selected === i ? ' selected' : '');
+    slot.className = 'slot' + (state.selected === i ? ' selected' : '');
     slot.innerHTML =
-      `<span class="slot-name">Panel ${i + 1}</span>` +
-      `<label class="slot-upload">Load photo<input type="file" accept="image/*" data-panel="${i}"></label>` +
+      `<span class="slot-label">Panel ${i + 1}</span>` +
+      `<label class="slot-load">Load photo<input type="file" accept="image/*" data-panel="${i}"></label>` +
       `<label class="slot-zoom">Zoom <input type="range" min="1" max="2.6" step="0.05" value="${state.panels[i].zoom}" data-zoom="${i}"></label>`;
     slot.addEventListener('click', (event) => {
       if (event.target.tagName === 'INPUT') return;
@@ -111,9 +117,7 @@ function buildPanelSlots(state, rerender) {
         const img = await loadImage(url);
         const idx = Number(input.dataset.panel);
         state.panels[idx].img = img;
-        state.panels[idx].zoom = 1;
-        state.panels[idx].ox = 0;
-        state.panels[idx].oy = 0;
+        resetPanelTransform(state.panels[idx]);
         state.selected = idx;
       } finally {
         URL.revokeObjectURL(url);
@@ -124,13 +128,13 @@ function buildPanelSlots(state, rerender) {
   }
   for (const slider of wrap.querySelectorAll('input[type="range"]')) {
     slider.addEventListener('input', () => {
-      const idx = Number(slider.dataset.zoom);
-      state.panels[idx].zoom = Number(slider.value);
+      state.panels[Number(slider.dataset.zoom)].zoom = Number(slider.value);
       rerender();
     });
   }
 }
 
+// Which panel sits under a pointer position on the preview canvas, or -1.
 function panelAt(state, canvas, clientX, clientY) {
   const rect = canvas.getBoundingClientRect();
   const px = ((clientX - rect.left) / rect.width) * canvas.width;
@@ -158,12 +162,9 @@ function wirePointer(state, canvas, rerender) {
     if (!dragging) return;
     const panel = state.panels[dragging.idx];
     const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
-    const dx = (event.clientX - dragging.x) * scaleX;
-    const dy = (event.clientY - dragging.y) * scaleY;
-    const rects = layoutPanels(state.layout, canvas.width, canvas.height);
-    const r = rects[dragging.idx];
+    const dx = (event.clientX - dragging.x) * (canvas.width / rect.width);
+    const dy = (event.clientY - dragging.y) * (canvas.height / rect.height);
+    const r = layoutPanels(state.layout, canvas.width, canvas.height)[dragging.idx];
     panel.ox = Math.max(-1, Math.min(1, panel.ox + (dx / Math.max(1, r.w)) * 2));
     panel.oy = Math.max(-1, Math.min(1, panel.oy + (dy / Math.max(1, r.h)) * 2));
     dragging.x = event.clientX;
@@ -215,21 +216,17 @@ function wireButtons(state, rerender) {
     button.addEventListener('click', async () => {
       const img = await loadImage(SAMPLES[button.dataset.sample].file);
       state.panels[state.selected].img = img;
-      state.panels[state.selected].zoom = 1;
-      state.panels[state.selected].ox = 0;
-      state.panels[state.selected].oy = 0;
+      resetPanelTransform(state.panels[state.selected]);
       rerender();
     });
   }
-  document.getElementById('fill-all').addEventListener('click', async () => {
+  document.getElementById('fill-all').addEventListener('click', () => {
     const img = state.panels[state.selected].img;
     if (!img) return;
     const count = LAYOUTS[state.layout].panels;
     for (let i = 0; i < count; i++) {
       state.panels[i].img = img;
-      state.panels[i].zoom = 1;
-      state.panels[i].ox = 0;
-      state.panels[i].oy = 0;
+      resetPanelTransform(state.panels[i]);
     }
     rerender();
   });

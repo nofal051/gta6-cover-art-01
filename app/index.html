@@ -3,72 +3,72 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Vice Nights Cover Press — GTA-style cover art maker</title>
+<title>Vice Nights Cover Press — make a GTA-style cover</title>
 <link rel="stylesheet" href="./style.css">
 </head>
 <body>
-<header class="topbar">
+<header class="masthead">
   <h1>Vice Nights <span>Cover Press</span></h1>
-  <p class="tagline">Your photo + a caption = a Vice-style poster. Photos never leave your machine.</p>
+  <p class="strapline">Turn your photo into a Vice-style poster. Everything stays on your machine — nothing is uploaded.</p>
 </header>
-<main class="editor">
-  <section class="preview-pane">
+<main class="workspace">
+  <section class="stage">
     <canvas id="cover" width="880" height="495"></canvas>
-    <p class="hint">Click a panel to select it. Drag a photo to move it, scroll to zoom it.</p>
+    <p class="tip">Pick a panel, then drag its photo to pan and scroll to zoom.</p>
   </section>
-  <aside class="controls">
-    <section class="group">
-      <h2>1 · Photos</h2>
+  <aside class="panel">
+    <section class="card">
+      <h2>Step 1 — Photos</h2>
       <div id="panels"></div>
-      <div class="samples">
+      <div class="sample-row">
         <button type="button" data-sample="boulevard">Boulevard</button>
         <button type="button" data-sample="neon">Neon street</button>
         <button type="button" data-sample="pier">Pier</button>
-        <button type="button" id="fill-all">One photo for all panels</button>
+        <button type="button" id="fill-all">Use one photo everywhere</button>
       </div>
     </section>
-    <section class="group">
-      <h2>2 · Layout</h2>
-      <div class="buttons">
-        <button type="button" data-group="layout" data-value="hero-three">Hero + Three</button>
-        <button type="button" data-group="layout" data-value="grid-four">Four Grid</button>
-        <button type="button" data-group="layout" data-value="full-bleed">Full Bleed</button>
-        <button type="button" data-group="layout" data-value="triple-strip">Triple Strip</button>
+    <section class="card">
+      <h2>Step 2 — Layout</h2>
+      <div class="row">
+        <button type="button" data-group="layout" data-value="hero-three">Hero + 3</button>
+        <button type="button" data-group="layout" data-value="grid-four">2 × 2 grid</button>
+        <button type="button" data-group="layout" data-value="full-bleed">One photo</button>
+        <button type="button" data-group="layout" data-value="triple-strip">3 strips</button>
       </div>
     </section>
-    <section class="group">
-      <h2>3 · Colour grade</h2>
-      <div class="buttons">
-        <button type="button" data-group="grade" data-value="sunset">Vice Sunset</button>
-        <button type="button" data-group="grade" data-value="neon">Neon Night</button>
-        <button type="button" data-group="grade" data-value="golden">Golden Hour</button>
-        <button type="button" data-group="grade" data-value="dusk">Dusk Violet</button>
-        <button type="button" data-group="grade" data-value="noir">Palm Noir</button>
+    <section class="card">
+      <h2>Step 3 — Colour grade</h2>
+      <div class="row">
+        <button type="button" data-group="grade" data-value="sunset">Sunset</button>
+        <button type="button" data-group="grade" data-value="neon">Neon</button>
+        <button type="button" data-group="grade" data-value="golden">Golden</button>
+        <button type="button" data-group="grade" data-value="dusk">Dusk</button>
+        <button type="button" data-group="grade" data-value="noir">Noir</button>
       </div>
     </section>
-    <section class="group">
-      <h2>4 · Caption</h2>
+    <section class="card">
+      <h2>Step 4 — Caption</h2>
       <label>Title <input id="title" type="text" value="SUNSET HEIST" maxlength="40"></label>
       <label>Subtitle <input id="subtitle" type="text" value="one last score" maxlength="40"></label>
       <label>Keywords, comma separated <input id="keywords" type="text" value="SUNSET, HEIST, NEON, PALMS" maxlength="60"></label>
     </section>
-    <section class="group">
-      <h2>5 · Size &amp; export PNG</h2>
-      <div class="buttons">
-        <button type="button" data-group="size" data-value="square">Square 1080 × 1080</button>
-        <button type="button" data-group="size" data-value="portrait">Portrait 1080 × 1350</button>
-        <button type="button" data-group="size" data-value="wide">Wide 1920 × 1080</button>
+    <section class="card">
+      <h2>Step 5 — Size &amp; export</h2>
+      <div class="row">
+        <button type="button" data-group="size" data-value="square">Square · 1080 × 1080</button>
+        <button type="button" data-group="size" data-value="portrait">Portrait · 1080 × 1350</button>
+        <button type="button" data-group="size" data-value="wide">Wide · 1920 × 1080</button>
       </div>
-      <div class="buttons export">
-        <button type="button" data-export="square">Export square PNG</button>
-        <button type="button" data-export="portrait">Export portrait PNG</button>
-        <button type="button" data-export="wide">Export wide PNG</button>
+      <div class="row export-row">
+        <button type="button" data-export="square">Download square PNG</button>
+        <button type="button" data-export="portrait">Download portrait PNG</button>
+        <button type="button" data-export="wide">Download wide PNG</button>
       </div>
     </section>
   </aside>
 </main>
 <footer>
-  <p>All art in this app is drawn in-app or generated for it. No Rockstar Games logo, artwork or font is used. Fonts: Anton and Pacifico under the SIL Open Font License (see fonts/OFL.txt).</p>
+  <p>Every picture here is drawn in the app or generated for it. No Rockstar Games logo, artwork or font is used anywhere. The Anton and Pacifico fonts ship under the SIL Open Font License — see fonts/OFL.txt.</p>
 </footer>
 <script type="module" src="./src/main.js"></script>
 </body>

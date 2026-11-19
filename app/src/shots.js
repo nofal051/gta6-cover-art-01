@@ -1,10 +1,11 @@
 // Vice Nights Cover Press — deterministic screenshot scenes.
 //
-// ?shot=cover renders one exported cover full-frame (the app's own drawing
-// of the PNG it exports, at the export size). ?shot=editor uses the normal
-// editor with a photo loaded. Every scene picks its photo, caption, layout,
-// grade and size from the query string, waits for the fonts and the photos,
-// then sets window.__shotReady so a headless browser knows the frame is done.
+// ?shot=cover paints one exported cover full-frame: the app's own drawing
+// of the PNG it exports, at the export size. ?shot=editor shows the normal
+// editor with a photo loaded. Every scene takes its photo, caption,
+// layout, grade and size from the query string, waits for the fonts and
+// the photos, then sets window.__shotReady so a headless browser knows
+// the frame is done.
 
 import { drawCover, SIZES } from './cover.js';
 
@@ -32,15 +33,14 @@ export function applyShotParams(state, params) {
 export async function loadShotPhotos(state, params, loadSamples, loadImage) {
   const photo = params.get('photo') || 'pier';
   await loadSamples(state);
-  if (SHOT_SAMPLES[photo]) {
-    const img = await loadImage(SHOT_SAMPLES[photo]);
-    state.panels[0].img = img;
-    // Fill the other panels with the remaining samples so no two panels
-    // in a row repeat the same photo.
-    const rest = ['boulevard', 'neon', 'pier'].filter((key) => key !== photo);
-    for (let i = 1; i < state.panels.length; i++) {
-      state.panels[i].img = await loadImage(SHOT_SAMPLES[rest[(i - 1) % rest.length]]);
-    }
+  if (!SHOT_SAMPLES[photo]) return;
+  const img = await loadImage(SHOT_SAMPLES[photo]);
+  state.panels[0].img = img;
+  // Fill the other panels with the remaining samples, so no two panels
+  // in a row repeat the same photo.
+  const rest = ['boulevard', 'neon', 'pier'].filter((key) => key !== photo);
+  for (let i = 1; i < state.panels.length; i++) {
+    state.panels[i].img = await loadImage(SHOT_SAMPLES[rest[(i - 1) % rest.length]]);
   }
 }
 
