@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vice Nights Cover Press — GTA-style cover art maker</title>
+<link rel="stylesheet" href="./style.css">
+</head>
+<body>
+<header class="topbar">
+  <h1>Vice Nights <span>Cover Press</span></h1>
+  <p class="tagline">Your photo + a caption = a Vice-style poster. Photos never leave your machine.</p>
+</header>
+<main class="editor">
+  <section class="preview-pane">
+    <canvas id="cover" width="880" height="495"></canvas>
+    <p class="hint">Click a panel to select it. Drag a photo to move it, scroll to zoom it.</p>
+  </section>
+  <aside class="controls">
+    <section class="group">
+      <h2>1 · Photos</h2>
+      <div id="panels"></div>
+      <div class="samples">
+        <button type="button" data-sample="boulevard">Boulevard</button>
+        <button type="button" data-sample="neon">Neon street</button>
+        <button type="button" data-sample="pier">Pier</button>
+        <button type="button" id="fill-all">One photo for all panels</button>
+      </div>
+    </section>
+    <section class="group">
+      <h2>2 · Layout</h2>
+      <div class="buttons">
+        <button type="button" data-group="layout" data-value="hero-three">Hero + Three</button>
+        <button type="button" data-group="layout" data-value="grid-four">Four Grid</button>
+        <button type="button" data-group="layout" data-value="full-bleed">Full Bleed</button>
+        <button type="button" data-group="layout" data-value="triple-strip">Triple Strip</button>
+      </div>
+    </section>
+    <section class="group">
+      <h2>3 · Colour grade</h2>
+      <div class="buttons">
+        <button type="button" data-group="grade" data-value="sunset">Vice Sunset</button>
+        <button type="button" data-group="grade" data-value="neon">Neon Night</button>
+        <button type="button" data-group="grade" data-value="golden">Golden Hour</button>
+        <button type="button" data-group="grade" data-value="dusk">Dusk Violet</button>
+        <button type="button" data-group="grade" data-value="noir">Palm Noir</button>
+      </div>
+    </section>
+    <section class="group">
+      <h2>4 · Caption</h2>
+      <label>Title <input id="title" type="text" value="SUNSET HEIST" maxlength="40"></label>
+      <label>Subtitle <input id="subtitle" type="text" value="one last score" maxlength="40"></label>
+      <label>Keywords, comma separated <input id="keywords" type="text" value="SUNSET, HEIST, NEON, PALMS" maxlength="60"></label>
+    </section>
+    <section class="group">
+      <h2>5 · Size &amp; export PNG</h2>
+      <div class="buttons">
+        <button type="button" data-group="size" data-value="square">Square 1080 × 1080</button>
+        <button type="button" data-group="size" data-value="portrait">Portrait 1080 × 1350</button>
+        <button type="button" data-group="size" data-value="wide">Wide 1920 × 1080</button>
+      </div>
+      <div class="buttons export">
+        <button type="button" data-export="square">Export square PNG</button>
+        <button type="button" data-export="portrait">Export portrait PNG</button>
+        <button type="button" data-export="wide">Export wide PNG</button>
+      </div>
+    </section>
+  </aside>
+</main>
+<footer>
+  <p>All art in this app is drawn in-app or generated for it. No Rockstar Games logo, artwork or font is used. Fonts: Anton and Pacifico under the SIL Open Font License (see fonts/OFL.txt).</p>
+</footer>
+<script type="module" src="./src/main.js"></script>
+</body>
+</html>
