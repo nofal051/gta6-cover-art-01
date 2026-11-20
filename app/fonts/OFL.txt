@@ -1,9 +1,9 @@
-Copyright 2020 The Anton Project Authors (https://github.com/googlefonts/AntonFont)
-Copyright 2011 The Pacifico Project Authors (https://github.com/googlefonts/Pacifico)
+Copyright (c) 2011, Vernon Adams (vernon@newtypography.co.uk), with Reserved Font Name 'Anton'.
+Copyright (c) 2011, Vernon Adams (vernon@newtypography.co.uk), with Reserved Font Name 'Pacifico'.
 
 This Font Software is licensed under the SIL Open Font License, Version 1.1.
 This license is copied below, and is also available with a FAQ at:
-https://scripts.sil.org/OFL
+http://scripts.sil.org/OFL
 
 
 -----------------------------------------------------------
@@ -90,5 +90,5 @@ OF COPYRIGHT, PATENT, TRADEMARK, OR OTHER RIGHT. IN NO EVENT SHALL THE
 COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
 INCLUDING ANY GENERAL, SPECIAL, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL
 DAMAGES, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM
-OTHER DEALINGS IN THE FONT SOFTWARE.
+FROM, OUT OF OR IN CONNECTION WITH THE USE OR INABILITY TO USE THE FONT
+SOFTWARE OR FROM OTHER DEALINGS IN THE FONT SOFTWARE.
